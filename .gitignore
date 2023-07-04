@@ -34,3 +34,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Temp files ###
+./*.svg
+./*.png
