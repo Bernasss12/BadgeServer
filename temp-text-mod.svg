@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style>
+            .text {
+                fill:#b0bac5;
+                font-family:Inter;
+                font-size:18px;
+                font-weight: normal;
+                font-style: normal;
+                font-stretch: normal;
+                font-variant: normal;
+            }
+        </style>
+    </defs>
+    <text class="text">1.880M</text>
+</svg>
