@@ -6,10 +6,7 @@ import io.ktor.client.engine.java.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.plugins.*
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.*
 
 object ModrinthDataFetcher : DataFetcher {
 
@@ -31,23 +28,23 @@ object ModrinthDataFetcher : DataFetcher {
     }
 
     override suspend fun getModName(id: String): String {
-        return getInfo(id)["title"]?.jsonPrimitive?.content?: "Error"
+        return getInfo(id)["title"]?.jsonPrimitive?.content ?: "Error"
     }
 
     override suspend fun getSupportedGameVersions(id: String): List<String> {
-        TODO()
+        return getInfo(id)["game_version"]?.jsonArray?.map { it.jsonPrimitive.content } ?: listOf()
     }
 
     override suspend fun getDownloadCount(id: String): UInt {
-        return getInfo(id)["downloads"]?.jsonPrimitive?.content?.toUInt()?: throw UnsupportedOperationException()
+        return getInfo(id)["downloads"]?.jsonPrimitive?.content?.toUInt() ?: throw UnsupportedOperationException()
     }
 
     override suspend fun getSupportedModLoaders(id: String): List<String> {
-        TODO("Not yet implemented")
+        return getInfo(id)["loaders"]?.jsonArray?.map { it.jsonPrimitive.content } ?: listOf()
     }
 
     override suspend fun getLicence(id: String): String {
-        TODO("Not yet implemented")
+        return getInfo(id)["license"]?.jsonObject?.get("name")?.jsonPrimitive?.content ?: "Error"
     }
 
 }
