@@ -52,7 +52,7 @@ class Templater(file: File) {
             "text-rect-width" to width + template.padding + template.minWidth,
             "text-rect-height" to template.height,
             "svg-width" to width + template.padding + template.minWidth,
-            "svg-height" to template.height,
+            "svg-height" to template.svgHeight,
         )
 
     fun replaceText(text: String) {

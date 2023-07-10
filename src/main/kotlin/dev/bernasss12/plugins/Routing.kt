@@ -3,14 +3,11 @@ package dev.bernasss12.plugins
 import dev.bernasss12.fetching.CurseforgeDataFetcher
 import dev.bernasss12.fetching.ModrinthDataFetcher
 import dev.bernasss12.templater.Template
-import dev.bernasss12.templater.Templater
-import dev.bernasss12.util.DataFormatter
 import dev.bernasss12.util.SvgGenerator
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.io.File
 
 fun Application.configureRouting() {
 
@@ -39,7 +36,7 @@ fun Application.configureRouting() {
                 status = HttpStatusCode.OK
             )
         }
-        get("/modrinth/{mod-id-slug}/name") {
+        get("/modrinth/{modid}/name") {
             call.respondText(
                 text = SvgGenerator.generate(
                     Template.MODRINTH_ICON_TEXT,

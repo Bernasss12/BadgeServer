@@ -12,6 +12,7 @@ data class Template(
     val dataFetcher: DataFetcher,
     val minWidth: Float,
     val height: Float,
+    val svgHeight: Float = height,
     val textHeightOffset: Float,
     val pad: Float,
 ) {
@@ -30,7 +31,8 @@ data class Template(
             dataFetcher = ModrinthDataFetcher,
             minWidth = 35f,
             textHeightOffset = 18.5f,
-            height = 35f,
+            height = 30f,
+            svgHeight = 35f,
             pad = 12f,
         )
 
