@@ -23,7 +23,13 @@ object DataFormatter {
         }
 
     public suspend fun getComputedLength(model: Template, text: String): Int {
-        val tempFileName = "temp-${model.name}-${text.replace(" ", "_")}"
+        val tempFolder = File("temp")
+
+        if (!tempFolder.exists()) {
+            tempFolder.mkdir()
+        }
+
+        val tempFileName = "${tempFolder.name}/temp-${model.name}-${text.replace(" ", "_")}"
         val tempFilePng = File("$tempFileName.png")
         val tempFileSvg = File("$tempFileName.svg")
 
