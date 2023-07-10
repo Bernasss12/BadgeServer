@@ -39,4 +39,12 @@ object DataFormatter {
         return textWidth
     }
 
+    fun formatVersions(gameVersions: List<String>, maxVersions: Int): String {
+        return gameVersions.take(maxVersions).joinToString(" | ") // TODO sort chronologically if not originally sorted.
+    }
+
+    fun formatLoaders(supportedModLoaders: List<String>): String {
+        return supportedModLoaders.joinToString(" | ")
+    }
+
 }
