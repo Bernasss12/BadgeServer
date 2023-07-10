@@ -1,8 +1,10 @@
 package dev.bernasss12.plugins
 
 import dev.bernasss12.fetching.ModrinthDataFetcher
+import dev.bernasss12.templater.Template
 import dev.bernasss12.templater.Templater
 import dev.bernasss12.util.DataFormatter
+import dev.bernasss12.util.SvgGenerator
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -39,52 +41,16 @@ fun Application.configureRouting() {
             call.respondText(xml, ContentType.Image.SVG, HttpStatusCode.OK)
         }
         get("/modrinth/{mod-id-slug}/name") {
-
+            call.respondText(
+                text = SvgGenerator.generate(
+                    Template.MODRINTH_ICON_TEXT,
+                    call.parameters["modid"]!!,
+                    ModrinthDataFetcher,
+                    SvgGenerator.DataTypes.NAME.toString()
+                ),
+                contentType = ContentType.Image.SVG,
+                status = HttpStatusCode.OK
+            )
         }
     }
-}
-
-private suspend fun curseforge(name: String): String {
-
-    val model = "curseforge"
-
-    val textWidth = DataFormatter.getComputedLength(model, name)
-
-    val pad = 7
-    val padding = pad * 2
-
-    val xml = Templater(File("src/main/resources/templates/curseforge/icon_text.svg"))
-        .replacePlaceholders(
-            mapOf(
-                "text" to name,
-                "text-y" to 16,
-                "text-x" to (textWidth + padding) / 2.0 + 35,
-                "text-rect-width" to textWidth + padding,
-                "svg-width" to textWidth + padding + 35,
-                "svg-height" to 30,
-            )
-        )
-    return xml
-}
-
-private suspend fun modrinth(name: String): String {
-    val model = "modrinth"
-
-    val textWidth = DataFormatter.getComputedLength(model, name)
-
-    val pad = 12
-    val padding = pad * 2
-
-    return Templater(File("src/main/resources/templates/modrinth/icon_text.svg"))
-        .replacePlaceholders(
-            mapOf<String, Any>(
-                "text" to name,
-                "text-x" to (textWidth + padding) / 2.0 + 35,
-                "text-y" to 18.5,
-                "text-rect-width" to textWidth + padding + 36,
-                "text-rect-height" to 30,
-                "svg-width" to textWidth + padding + 35,
-                "svg-height" to 35,
-            )
-        )
 }

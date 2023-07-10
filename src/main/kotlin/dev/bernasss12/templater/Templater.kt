@@ -15,7 +15,7 @@ class Templater(file: File) {
      *  - default value will only be used if there is no matching key in [valuesMap]
      *  - if there is no matching key in [valuesMap] and no default value for a key this method will complain.
      */
-    fun replacePlaceholders(valuesMap: Map<String, Any>): String {
+    public fun replacePlaceholders(valuesMap: Map<String, Any>): String {
         val regex = "\\{!(.+?)}".toRegex(RegexOption.DOT_MATCHES_ALL)
         val results = regex.findAll(contents).map(::Replace)
 
@@ -43,6 +43,21 @@ class Templater(file: File) {
     }
 
     fun replacePlaceholders(vararg values: Pair<String, Any>) = replacePlaceholders(valuesMap = values.toMap())
+
+    fun replaceWithSingleText(text: String, width: Int, template: Template) =
+        replacePlaceholders(
+            "text" to text,
+            "text-x" to (width + template.padding) / 2.0 + template.minWidth,
+            "text-y" to template.textHeightOffset,
+            "text-rect-width" to width + template.padding + template.minWidth,
+            "text-rect-height" to template.height,
+            "svg-width" to width + template.padding + template.minWidth,
+            "svg-height" to template.height,
+        )
+
+    fun replaceText(text: String) {
+
+    }
 
     class Replace(match: MatchResult) {
         val replace = match.value
