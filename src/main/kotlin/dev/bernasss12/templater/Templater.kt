@@ -1,10 +1,12 @@
 package dev.bernasss12.templater
 
+import io.ktor.util.logging.*
 import java.io.File
 
 class Templater(file: File) {
 
     private val contents = file.readText()
+    private val logger = KtorSimpleLogger("templater")
 
     /**
      * The expected format is as follows:
@@ -15,17 +17,28 @@ class Templater(file: File) {
      *  - default value will only be used if there is no matching key in [valuesMap]
      *  - if there is no matching key in [valuesMap] and no default value for a key this method will complain.
      */
-    public fun replacePlaceholders(valuesMap: Map<String, Any>): String {
+    private fun replacePlaceholders(valuesMap: Map<String, Any>): String {
         val regex = "\\{!(.+?)}".toRegex(RegexOption.DOT_MATCHES_ALL)
         val results = regex.findAll(contents).map(::Replace)
+
+        val cleanValues: Map<String, String> = valuesMap.mapValues {
+            it.value.toString().let { value ->
+                if (value.matches("[a-zA-Z0-9\\-_'| ()\\[\\]]*".toRegex())) {
+                    logger.error("possible suspicious input: $value")
+                    "redacted"
+                } else {
+                    value
+                }
+            }
+        }
 
         val used = mutableSetOf<String>()
         val missing = mutableSetOf<String>()
 
         var replaced = contents
         results.forEach { match ->
-            if (valuesMap.containsKey(match.key)) {
-                replaced = replaced.replace(match.replace, valuesMap[match.key].toString())
+            if (cleanValues.containsKey(match.key)) {
+                replaced = replaced.replace(match.replace, cleanValues[match.key].toString())
                 used.add(match.key)
             } else if (match.hasDefault) {
                 replaced = replaced.replace(match.replace, match.default)
@@ -36,7 +49,7 @@ class Templater(file: File) {
             }
         }
 
-        val unused = valuesMap.map { it.key }.toMutableSet().also { it.removeAll(used) }
+        val unused = cleanValues.map { it.key }.toMutableSet().also { it.removeAll(used) }
         println("Unused: $unused")
 
         return replaced
