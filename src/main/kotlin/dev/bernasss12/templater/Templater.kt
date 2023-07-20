@@ -23,7 +23,7 @@ class Templater(file: File) {
 
         val cleanValues: Map<String, String> = valuesMap.mapValues {
             it.value.toString().let { value ->
-                if (value.matches("[a-zA-Z0-9\\-_'| ()\\[\\]]*".toRegex())) {
+                if (!value.matches("[a-zA-Z0-9\\-_'| .,()\\[\\]]*".toRegex())) {
                     logger.error("possible suspicious input: $value")
                     "redacted"
                 } else {
