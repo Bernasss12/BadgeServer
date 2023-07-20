@@ -6,45 +6,65 @@ import io.ktor.client.engine.java.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.plugins.*
+import io.ktor.util.logging.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.*
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 object ModrinthDataFetcher : DataFetcher {
 
-    private const val modrinthUrl = "https://api.modrinth.com/v2/project/"
+    const val MOD_ID_REGEX = "[\\w!@\$()`.+,\"\\-']{3,64}"
 
-    private suspend fun getInfo(id: String): JsonObject {
-        HttpClient(Java).use { client ->
-            val response = client.get("$modrinthUrl$id") {
+    private const val modrinthUrl = "https://api.modrinth.com/v2/project/"
+    private val modIdRegex = MOD_ID_REGEX.toRegex()
+    private val logger = KtorSimpleLogger(javaClass.canonicalName)
+    private val mutex = Mutex()
+    private val httpClient = HttpClient(Java)
+
+    private val cache: MutableMap<String, Pair<Long, JsonObject>> = hashMapOf()
+    private val cacheTimeout = 5.minutes
+
+    private var remainingRequests: Int = 0
+    private var resetAt: Long = 0
+
+    override suspend fun requestModInfo(modid: String): JsonObject {
+        mutex.withLock {
+            val cacheEntry = cache[modid]
+            if (cacheEntry != null && System.currentTimeMillis() <= cacheEntry.first + cacheTimeout.inWholeMilliseconds) {
+                return cacheEntry.second
+            }
+            if (!modid.matches(modIdRegex)) {
+                throw BadRequestException("modid parameter does not match regular expression for mod ids")
+            }
+            if (remainingRequests == 0) {
+                delay((resetAt - System.currentTimeMillis()).milliseconds)
+            }
+            val requestUrl = "$modrinthUrl$modid"
+            val response = httpClient.get(requestUrl) {
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json)
                 }
             }
             if (response.status == HttpStatusCode.OK) {
-                return Json.decodeFromString(response.body() as String)
+                remainingRequests = response.headers["X-RateLimit-Remaining"]?.toInt() ?: 100
+                val currentTime = System.currentTimeMillis()
+                resetAt = (response.headers["X-RateLimit-Reset"]?.toInt()?.plus(1) ?: 60).seconds.inWholeMilliseconds + currentTime
+                return Json.decodeFromString<JsonObject>(response.body() as String).also { jsonObject ->
+                    cache[modid] = currentTime to jsonObject
+                }
             } else {
-                throw NotFoundException("Resource not found. ID or SLUG might be wrong.")
+                val body: String = try {
+                    response.body()
+                } catch (err: RuntimeException) {
+                    "unable to get response body: ${err.javaClass.name}"
+                }
+                logger.error("Requesting $requestUrl returned bad status ${response.status}:\n$body")
+                throw RuntimeException("modrinth API request did not succeed")
             }
         }
     }
-
-    override suspend fun getModName(id: String): String {
-        return getInfo(id)["title"]?.jsonPrimitive?.content ?: "Error"
-    }
-
-    override suspend fun getSupportedGameVersions(id: String): List<String> {
-        return getInfo(id)["game_version"]?.jsonArray?.map { it.jsonPrimitive.content } ?: listOf()
-    }
-
-    override suspend fun getDownloadCount(id: String): UInt {
-        return getInfo(id)["downloads"]?.jsonPrimitive?.content?.toUInt() ?: throw UnsupportedOperationException()
-    }
-
-    override suspend fun getSupportedModLoaders(id: String): List<String> {
-        return getInfo(id)["loaders"]?.jsonArray?.map { it.jsonPrimitive.content } ?: listOf()
-    }
-
-    override suspend fun getLicence(id: String): String {
-        return getInfo(id)["license"]?.jsonObject?.get("name")?.jsonPrimitive?.content ?: "Error"
-    }
-
 }

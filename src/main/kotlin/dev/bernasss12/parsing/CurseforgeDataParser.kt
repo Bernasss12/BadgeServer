@@ -1,6 +1,6 @@
-package dev.bernasss12.fetching
+package dev.bernasss12.parsing
 
-object CurseforgeDataFetcher : DataFetcher {
+object CurseforgeDataParser : DataParser {
 
     override suspend fun getModName(id: String): String {
         TODO("Not yet implemented")
