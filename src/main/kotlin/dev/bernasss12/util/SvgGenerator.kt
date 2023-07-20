@@ -4,6 +4,11 @@ import dev.bernasss12.parsing.DataParser
 import dev.bernasss12.templater.Template
 import dev.bernasss12.templater.Templater
 import io.ktor.util.logging.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlin.io.path.exists
+import kotlin.io.path.notExists
+import kotlin.io.path.readText
 
 object SvgGenerator {
 
@@ -25,12 +30,13 @@ object SvgGenerator {
 
         val text = when (DataTypes.valueOf(dataTypeString)) {
             DataTypes.DOWNLOADS -> {
-                val downloadCount: UInt = dataFetcher.getDownloadCount(ident) ?: 0u.also{
+                val downloadCount: UInt = dataFetcher.getDownloadCount(ident) ?: 0u.also {
                     logger.error("")
                     throw RuntimeException("could not fetch download count")
                 }
                 DataFormatter.formatNumberShorten(downloadCount, false)
             }
+
             DataTypes.NAME -> dataFetcher.getModName(ident)
             DataTypes.VERSIONS -> DataFormatter.formatVersions(dataFetcher.getSupportedGameVersions(ident), 3)
             DataTypes.LOADER -> DataFormatter.formatLoaders(dataFetcher.getSupportedModLoaders(ident))
@@ -39,6 +45,20 @@ object SvgGenerator {
 
         val width = DataFormatter.getComputedLength(template, text)
 
-        return templater.replaceWithSingleText(text, width, template)
+        val exportPath = Common.tempFile("render-${template.name}", text, "svg")
+        return withContext(Dispatchers.IO) {
+            if (exportPath.exists()) {
+                return@withContext exportPath.readText()
+            }
+            Common.runInkscape(
+                logger = logger,
+                input = templater.replaceWithSingleText(text, width, template),
+                inkscapeOptions = "--export-overwrite --export-text-to-path --export-type=svg --export-plain-svg --export-filename=$exportPath"
+            )
+            if (exportPath.notExists()) {
+                error("Inkscape did not render the file $exportPath!")
+            }
+            return@withContext exportPath.readText()
+        }
     }
 }
