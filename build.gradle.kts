@@ -31,6 +31,14 @@ repositories {
     mavenCentral()
 }
 
+tasks.distTar {
+    archiveVersion.set("")
+}
+
+tasks.distZip {
+    archiveVersion.set("")
+}
+
 dependencies {
     implementation("io.ktor:ktor-server-core-jvm:$ktor_version")
     implementation("io.ktor:ktor-client-core-jvm:$ktor_version")
