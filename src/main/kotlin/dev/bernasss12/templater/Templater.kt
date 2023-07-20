@@ -1,11 +1,9 @@
 package dev.bernasss12.templater
 
 import io.ktor.util.logging.*
-import java.io.File
 
-class Templater(file: File) {
+class Templater(private val contents: String) {
 
-    private val contents = file.readText()
     private val logger = KtorSimpleLogger("templater")
     private val disallowedCharacters = "[^a-zA-Z0-9\\-_'| .,()\\[\\]]".toRegex()
     private val tokenRegex = "\\{!(.+?)}".toRegex(RegexOption.DOT_MATCHES_ALL)

@@ -18,7 +18,10 @@ object SvgGenerator {
     }
 
     suspend fun generate(template: Template, ident: String, dataFetcher: DataParser, dataTypeString: String): String {
-        val templater = Templater(template.file)
+        val templateResourceText = javaClass.getResourceAsStream(template.res)?.use {
+            it.reader().readText()
+        } ?: error("Could not open resource ${template.res}")
+        val templater = Templater(templateResourceText)
 
         val text = when (DataTypes.valueOf(dataTypeString)) {
             DataTypes.DOWNLOADS -> {

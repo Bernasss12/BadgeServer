@@ -3,12 +3,11 @@ package dev.bernasss12.templater
 import dev.bernasss12.parsing.CurseforgeDataParser
 import dev.bernasss12.parsing.DataParser
 import dev.bernasss12.parsing.ModrinthDataParser
-import java.io.File
 
 data class Template(
     val name: String,
-    val file: File,
-    val font: File,
+    val res: String,
+    val fontRes: String,
     val dataParser: DataParser,
     val minWidth: Float,
     val height: Float,
@@ -23,11 +22,10 @@ data class Template(
     companion object {
 
 
-        private val MODRINTH_TEXT_FILE = File("src/main/resources/templates/modrinth/text.svg")
         val MODRINTH_ICON_TEXT = Template(
             name = "modrinth-icon-text",
-            file = File("src/main/resources/templates/modrinth/icon_text.svg"),
-            font = MODRINTH_TEXT_FILE,
+            res = "/templates/modrinth/icon_text.svg",
+            fontRes = "/templates/modrinth/text.svg",
             dataParser = ModrinthDataParser,
             minWidth = 35f,
             textHeightOffset = 18.5f,
@@ -36,11 +34,10 @@ data class Template(
             pad = 12f,
         )
 
-        private val CURSEFORGE_TEXT_FILE = File("src/main/resources/templates/curseforge/text.svg")
         val CURSEFORGE_ICON_TEXT = Template(
             name = "curseforge-icon-text",
-            file = File("src/main/resources/templates/curseforge/icon_text.svg"),
-            font = CURSEFORGE_TEXT_FILE,
+            res = "/templates/curseforge/icon_text.svg",
+            fontRes = "/templates/curseforge/text.svg",
             dataParser = CurseforgeDataParser,
             minWidth = 35f,
             textHeightOffset = 16f,

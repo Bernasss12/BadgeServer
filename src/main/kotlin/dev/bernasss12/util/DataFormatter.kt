@@ -2,6 +2,7 @@ package dev.bernasss12.util
 
 import dev.bernasss12.templater.Template
 import dev.bernasss12.templater.Templater
+import io.ktor.util.logging.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -10,6 +11,7 @@ import javax.imageio.ImageIO
 object DataFormatter {
 
     private val suffixes = listOf('k', 'M', 'G', 'T')
+    private val logger = KtorSimpleLogger("DataFormatter")
 
     fun formatNumberWithSeparators(number: UInt, separator: String): String =
         number.toString().reversed().chunked(3).reversed().joinToString(separator)
@@ -36,10 +38,16 @@ object DataFormatter {
 
         val textWidth = withContext(Dispatchers.IO) {
             if (!tempFilePng.exists()) {
-                val textSvg = Templater(model.font).replaceText(text)
+                val fontResourceText = javaClass.getResourceAsStream(model.fontRes)?.use {
+                    it.reader().readText()
+                } ?: error("Could not open font resource ${model.fontRes}")
+                val textSvg = Templater(fontResourceText).replaceText(text)
                 tempFileSvg.writeText(textSvg)
-                val termination = Runtime.getRuntime().exec("inkscape --export-area-drawing --export-type=png ${tempFileSvg.path}").waitFor()
-                if (termination != 0) println("Problem converting image.")
+                val inkscapeProcess = Runtime.getRuntime().exec("inkscape --export-area-drawing --export-type=png ${tempFileSvg.path}")
+                inkscapeProcess.waitFor()
+                logger.debug("Inkscape standard output: " + inkscapeProcess.inputReader().readText())
+                logger.debug("Inkscape error output: " + inkscapeProcess.errorReader().readText())
+//                if (inkscapeProcess.exitValue() != 0) println("Problem converting image.")
             }
             if (tempFilePng.exists()) {
                 ImageIO.read(tempFilePng)
