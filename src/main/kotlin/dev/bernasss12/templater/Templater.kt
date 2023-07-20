@@ -68,9 +68,10 @@ class Templater(file: File) {
             "svg-height" to template.svgHeight,
         )
 
-    fun replaceText(text: String) {
-
-    }
+    fun replaceText(text: String) =
+        replacePlaceholders(
+            "text" to text,
+        )
 
     class Replace(match: MatchResult) {
         val replace = match.value
