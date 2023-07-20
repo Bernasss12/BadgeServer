@@ -29,24 +29,30 @@ object DataFormatter {
             tempFolder.mkdir()
         }
 
-        val tempFileName = "${tempFolder.name}/temp-${model.name}-${text.replace(" ", "_")}"
+        val identifier = text.replace("[^a-zA-Z0-9\\-]".toRegex(), "_").replace("_+".toRegex(), "_")
+        val tempFileName = "${tempFolder.name}/temp-${model.name}-${identifier}"
         val tempFilePng = File("$tempFileName.png")
         val tempFileSvg = File("$tempFileName.svg")
 
         val textWidth = withContext(Dispatchers.IO) {
             if (!tempFilePng.exists()) {
-                val textSvg = Templater(model.font).replacePlaceholders("text" to text)
+                val textSvg = Templater(model.font).replaceText(text)
                 tempFileSvg.writeText(textSvg)
-                Runtime.getRuntime().exec("inkscape --export-area-drawing --export-type=png ${tempFileSvg.name}").waitFor()
+                val termination = Runtime.getRuntime().exec("inkscape --export-area-drawing --export-type=png ${tempFileSvg.path}").waitFor()
+                if (termination != 0) println("Problem converting image.")
             }
-            ImageIO.read(tempFilePng)
+            if (tempFilePng.exists()) {
+                ImageIO.read(tempFilePng)
+            } else {
+                throw Error("Inkscape didn't create the png.")
+            }
         }.width
 
         return textWidth
     }
 
     fun formatVersions(gameVersions: List<String>, maxVersions: Int): String {
-        return gameVersions.take(maxVersions).joinToString(" | ") // TODO sort chronologically if not originally sorted.
+        return gameVersions.takeLast(maxVersions).reversed().joinToString(" | ") // TODO sort chronologically if not originally sorted.
     }
 
     fun formatLoaders(supportedModLoaders: List<String>): String {
