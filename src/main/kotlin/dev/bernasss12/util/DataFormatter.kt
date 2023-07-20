@@ -11,10 +11,10 @@ object DataFormatter {
 
     private val suffixes = listOf('k', 'M', 'G', 'T')
 
-    public fun formatNumberWithSeparators(number: UInt, separator: String): String =
+    fun formatNumberWithSeparators(number: UInt, separator: String): String =
         number.toString().reversed().chunked(3).reversed().joinToString(separator)
 
-    public fun formatNumberShorten(number: UInt, decimal: Boolean): String =
+    fun formatNumberShorten(number: UInt, decimal: Boolean): String =
         number.toString().reversed().chunked(3).reversed().let { splitNumber ->
             val result = StringBuilder(splitNumber.first())
             if (decimal && splitNumber.size >= 2) result.append(".${splitNumber[1]}")
@@ -22,7 +22,7 @@ object DataFormatter {
             return result.toString()
         }
 
-    public suspend fun getComputedLength(model: Template, text: String): Int {
+    suspend fun getComputedLength(model: Template, text: String): Int {
         val tempFolder = File("temp")
 
         if (!tempFolder.exists()) {

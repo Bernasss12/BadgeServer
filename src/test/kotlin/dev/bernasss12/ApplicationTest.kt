@@ -1,5 +1,4 @@
 package dev.bernasss12
 
 
-class ApplicationTest {
-}
+class ApplicationTest

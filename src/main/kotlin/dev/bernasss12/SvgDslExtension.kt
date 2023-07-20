@@ -3,8 +3,7 @@ package dev.bernasss12
 import kotlinx.html.*
 import kotlinx.html.SVG
 
-open class SVGTag(tagName: String, initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag(tagName, consumer, initialAttributes, "http://www.w3.org/2000/svg", false, false), HtmlBlockInlineTag {
-}
+open class SVGTag(tagName: String, initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag(tagName, consumer, initialAttributes, "http://www.w3.org/2000/svg", false, false), HtmlBlockInlineTag
 
 inline fun HTMLTag.newSvg(classes: String? = null, crossinline block: SVGTag.() -> Unit) : Unit = SVGTag("svg", attributesMapOf("class", classes), consumer).visit(block)
 
@@ -18,7 +17,7 @@ open class G(
     tagName = "g",
     consumer = consumer,
     initialAttributes = initialAttributes,
-), HtmlBlockInlineTag {}
+), HtmlBlockInlineTag
 
 open class Path(
     initialAttributes: Map<String, String>,
