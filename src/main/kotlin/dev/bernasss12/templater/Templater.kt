@@ -7,6 +7,8 @@ class Templater(file: File) {
 
     private val contents = file.readText()
     private val logger = KtorSimpleLogger("templater")
+    private val disallowedCharacters = "[^a-zA-Z0-9\\-_'| .,()\\[\\]]".toRegex()
+    private val tokenRegex = "\\{!(.+?)}".toRegex(RegexOption.DOT_MATCHES_ALL)
 
     /**
      * The expected format is as follows:
@@ -18,14 +20,14 @@ class Templater(file: File) {
      *  - if there is no matching key in [valuesMap] and no default value for a key this method will complain.
      */
     private fun replacePlaceholders(valuesMap: Map<String, Any>): String {
-        val regex = "\\{!(.+?)}".toRegex(RegexOption.DOT_MATCHES_ALL)
+        val regex = tokenRegex
         val results = regex.findAll(contents).map(::Replace)
 
         val cleanValues: Map<String, String> = valuesMap.mapValues {
             it.value.toString().let { value ->
-                if (!value.matches("[a-zA-Z0-9\\-_'| .,()\\[\\]]*".toRegex())) {
-                    logger.error("possible suspicious input: $value")
-                    "redacted"
+                if (value.matches(disallowedCharacters)) {
+                    logger.warn("possible suspicious input: $value")
+                    disallowedCharacters.replace(value, "")
                 } else {
                     value
                 }
