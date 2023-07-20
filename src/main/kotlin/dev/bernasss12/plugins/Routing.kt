@@ -1,8 +1,8 @@
 package dev.bernasss12.plugins
 
+import dev.bernasss12.fetching.ModrinthDataFetcher
 import dev.bernasss12.parsing.CurseforgeDataParser
 import dev.bernasss12.parsing.ModrinthDataParser
-import dev.bernasss12.fetching.ModrinthDataFetcher
 import dev.bernasss12.templater.Template
 import dev.bernasss12.util.SvgGenerator
 import io.ktor.http.*

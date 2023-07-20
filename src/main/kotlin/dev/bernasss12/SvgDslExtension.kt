@@ -1,7 +1,6 @@
 package dev.bernasss12
 
 import kotlinx.html.*
-import kotlinx.html.SVG
 
 open class SVGTag(tagName: String, initialAttributes : Map<String, String>, override val consumer : TagConsumer<*>) : HTMLTag(tagName, consumer, initialAttributes, "http://www.w3.org/2000/svg", false, false), HtmlBlockInlineTag
 
