@@ -18,8 +18,8 @@ object DataFormatter {
 
     fun formatNumberShorten(number: UInt, decimal: Boolean): String =
         number.toString().reversed().chunked(3).reversed().let { splitNumber ->
-            val result = StringBuilder(splitNumber.first())
-            if (decimal && splitNumber.size >= 2) result.append(".${splitNumber[1]}")
+            val result = StringBuilder(splitNumber.first().reversed())
+            if (decimal && splitNumber.size >= 2) result.append(".${splitNumber[1].reversed()}")
             if (splitNumber.size >= 2) result.append(suffixes[splitNumber.size - 2])
             return result.toString()
         }
