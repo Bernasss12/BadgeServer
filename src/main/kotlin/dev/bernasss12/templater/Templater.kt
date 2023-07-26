@@ -44,13 +44,13 @@ class Templater(private val contents: String) {
                 replaced = replaced.replace(match.replace, match.default)
                 missing.add(match.key)
             } else {
-                println("Match ${match.key} did not have value or default.")
+                logger.trace("Match ${match.key} did not have value or default.")
                 missing.add(match.key)
             }
         }
 
         val unused = cleanValues.map { it.key }.toMutableSet().also { it.removeAll(used) }
-        println("Unused: $unused")
+        logger.trace("Unused: {}", unused)
 
         return replaced
     }
