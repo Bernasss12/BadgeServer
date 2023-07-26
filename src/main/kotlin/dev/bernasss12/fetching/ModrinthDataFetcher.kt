@@ -1,8 +1,10 @@
 package dev.bernasss12.fetching
 
+import dev.bernasss12.util.Common
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.java.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.plugins.*
@@ -24,7 +26,11 @@ object ModrinthDataFetcher : DataFetcher {
     private val modIdRegex = MOD_ID_REGEX.toRegex()
     private val logger = KtorSimpleLogger(javaClass.canonicalName)
     private val mutex = Mutex()
-    private val httpClient = HttpClient(Java)
+    private val httpClient = HttpClient(Java) {
+        install(UserAgent) {
+            agent = Common.getUserAgent(logger)
+        }
+    }
 
     private val cache: MutableMap<String, Pair<Long, JsonObject>> = hashMapOf()
     private val cacheTimeout = 5.minutes
