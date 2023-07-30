@@ -60,6 +60,19 @@ fun Application.configureRouting() {
                 status = HttpStatusCode.OK
             )
         }
+        get("/curseforge/{modid}/name") {
+            val modId = getModID(call) ?: return@get
+            call.respondText(
+                text = SvgGenerator.generate(
+                    Template.CURSEFORGE_ICON_TEXT,
+                    modId,
+                    CurseforgeDataParser,
+                    SvgGenerator.DataTypes.NAME.toString()
+                ),
+                contentType = ContentType.Image.SVG,
+                status = HttpStatusCode.OK
+            )
+        }
         get("/modrinth/{modid}/versions") {
             val modId = getModID(call) ?: return@get
             call.respondText(

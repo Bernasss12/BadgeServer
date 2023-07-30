@@ -22,7 +22,7 @@ object ModrinthDataFetcher : DataFetcher {
 
     const val MOD_ID_REGEX = "[\\w!@\$()`.+,\"\\-']{3,64}"
 
-    private const val modrinthUrl = "https://api.modrinth.com/v2/project/"
+    private const val MODRINTH_URL = "https://api.modrinth.com/v2/project/"
     private val modIdRegex = MOD_ID_REGEX.toRegex()
     private val logger = KtorSimpleLogger(javaClass.canonicalName)
     private val mutex = Mutex()
@@ -50,7 +50,7 @@ object ModrinthDataFetcher : DataFetcher {
             if (remainingRequests == 0) {
                 delay((resetAt - System.currentTimeMillis()).milliseconds)
             }
-            val requestUrl = "$modrinthUrl$modid"
+            val requestUrl = "$MODRINTH_URL$modid"
             val response = httpClient.get(requestUrl) {
                 headers {
                     append(HttpHeaders.Accept, ContentType.Application.Json)

@@ -20,6 +20,16 @@ object Common {
     }
 
     /**
+     * Gets the curseforge api token from curseforge-api-token.
+     */
+    fun getCurseforgeSecret(logger: Logger): String? {
+        return getPrivateString("curseforge-api-token", logger).also {
+            println(it)
+            println(it?.chars())
+        }
+    }
+
+    /**
      * Tries to get the user-agent to be sent in the GET requests from the following places, in order:
      * ./                       Current directory
      * ~/.config                User config directory (linux only)
