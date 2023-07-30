@@ -12,7 +12,7 @@ object Common {
     private val multiUnderscoresRegex = "_+".toRegex()
 
     /**
-     * Looks for a file named "badge-server-ua" or defaults
+     * Tries to get the user agent from the badge-server-ua file.
      */
     fun getUserAgent(logger: Logger): String {
         return getPrivateString("badge-server-ua", logger)
@@ -29,7 +29,7 @@ object Common {
         // Try current directory
         Paths.get("", filename).toAbsolutePath().let { currentPath ->
             if (currentPath.exists()) {
-                return currentPath.readText()
+                return currentPath.readText().trim()
             }
         }
 
@@ -37,7 +37,7 @@ object Common {
         val homePath = System.getProperty("user.home")
         Paths.get(homePath, ".config", filename).toAbsolutePath().let { configPath ->
             if (configPath.exists()) {
-                return configPath.readText()
+                return configPath.readText().trim()
             }
         }
 
@@ -46,7 +46,7 @@ object Common {
         if (envPath.isNotBlank()) {
             Paths.get(envPath, filename).let { environmentPath ->
                 if (environmentPath.exists()) {
-                    return environmentPath.readText()
+                    return environmentPath.readText().trim()
                 }
             }
         }
@@ -58,6 +58,7 @@ object Common {
     fun getTempFolder(): File = File("temp").also { it.mkdir() }
     fun makeSafeIdentifier(text: String): String =
         text.replace(unsafeRegex, "_").replace(multiUnderscoresRegex, "_")
+
     fun tempFile(prefix: String, text: String, extension: String = ""): Path =
         getTempFolder().toPath().resolve("${prefix}-${makeSafeIdentifier(text)}" + if (extension.isBlank()) "" else ".$extension")
 
@@ -68,7 +69,7 @@ object Common {
         }
         inkscapeProcess.waitFor()
         inkscapeProcess.inputReader().readText().takeIf { it.isNotBlank() }.also {
-            logger.debug("Inkscape standard output: $it" )
+            logger.debug("Inkscape standard output: $it")
         }
         inkscapeProcess.errorReader().readText().takeIf { it.isNotBlank() }.also {
             logger.debug("Inkscape error output: $it")
